@@ -10,7 +10,8 @@
 
 <body>
     <h1>Register</h1>
-    <form action="">
+    <!-- POST Request to /register -->
+    <form action="/register" method="POST">
         <div>
             <label for="username">Username: </label>
             <input type="text" name="username" id="username" placeholder="Enter Username">
@@ -18,11 +19,9 @@
         <div>
             <label for="password">Password: </label>
             <input type="text" name="password" id="password" placeholder="Enter Password">
+            <button>Sign Up</button>
     </form>
     </div>
-    <button>Sign Up</button>
-
-    </form>
 </body>
 
 </html>
