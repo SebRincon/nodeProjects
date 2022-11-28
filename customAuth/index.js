@@ -1,7 +1,8 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const User = require('./models/user');
-const bcrypt = require('bcrypt')
+const express =   require('express');
+const mongoose =  require('mongoose');
+const User =      require('./models/user');
+const bcrypt =    require('bcrypt');
+const session =   require('express-session');
 
 mongoose.connect('mongodb://localhost:27017/auth')
     .then(() => {
@@ -19,6 +20,8 @@ app.set('views', 'views');
 
 //Allow parseing of the request body
 app.use(express.urlencoded({ extended: true }));
+//Enabled session cookie w/ secret
+app.use(session({secret: "madeupsecret"}))
 
 app.get('/', (req, res) => { 
     res.send("This is the homepage")
@@ -33,10 +36,11 @@ app.post('/login', async (req, res) => {
     }else { 
         validPassword = await bcrypt.compare(password, user.password);
         if (validPassword) {
-            res.send("Logged In")
+            req.session.user_id = user._id;
+            res.redirect('/secret')
         }
         else { 
-            res.send("Username or Password is wrong")
+            res.redirect('/login')
         }
     }
 })
@@ -50,8 +54,18 @@ app.post('/register', async (req, res) => {
     //Passing hash into a new user object
     const user = new User({ username: username, password: hash });
     await user.save();
+    req.session.user_id = user._id;
     res.redirect('/');
 })
 
+
+app.get('/secret', (req, res) => { 
+    if (!req.session.user_id) { 
+        res.redirect('/login')
+    } else { 
+        res.send('Authorized.')
+
+    }
+})
 
 app.listen(3000, () => {console.log("Serving app")})
