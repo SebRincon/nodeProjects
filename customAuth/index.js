@@ -45,6 +45,14 @@ app.post('/login', async (req, res) => {
     }
 })
 
+app.post('/logout', (req, res) => { 
+    // Remove the session user_id
+    req.session.user_id = null;
+    // Compltely remove the user session
+    req.session.destroy()
+    res.redirect('/')
+})
+
 app.get('/register', (req, res) => {res.render('register')})
 app.post('/register', async (req, res) => {
     // Destructure the body 
@@ -61,11 +69,9 @@ app.post('/register', async (req, res) => {
 
 app.get('/secret', (req, res) => { 
     if (!req.session.user_id) { 
-        res.redirect('/login')
-    } else { 
-        res.send('Authorized.')
-
-    }
+        return res.redirect('/login')
+    } 
+    res.render('secret')
 })
 
 app.listen(3000, () => {console.log("Serving app")})
