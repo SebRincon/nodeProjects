@@ -23,6 +23,14 @@ app.use(express.urlencoded({ extended: true }));
 //Enabled session cookie w/ secret
 app.use(session({secret: "madeupsecret"}))
 
+//Require login middleware
+const requireLogin = (req, res, next) => { 
+    if (!req.session.user_id) { 
+        return res.redirect('/login')
+    }
+    next();
+}
+
 app.get('/', (req, res) => { 
     res.send("This is the homepage")
 })
@@ -30,13 +38,12 @@ app.get('/', (req, res) => {
 app.get('/login', (req, res) => {res.render('login')})
 app.post('/login', async (req, res) => {
     const { password, username } = req.body;
-    const user = await User.findOne({ username });
-    if (!user) {
+    const foundUser = await User.findAndValidate(username, password);
+    if (!foundUser) {
         res.send("Username or Password is wrong")
     }else { 
-        validPassword = await bcrypt.compare(password, user.password);
-        if (validPassword) {
-            req.session.user_id = user._id;
+        if (foundUser) {
+            req.session.user_id = foundUser._id;
             res.redirect('/secret')
         }
         else { 
@@ -57,20 +64,19 @@ app.get('/register', (req, res) => {res.render('register')})
 app.post('/register', async (req, res) => {
     // Destructure the body 
     const { password, username } = req.body;
-    const hash = await bcrypt.hash(password, 12);
-
+    
     //Passing hash into a new user object
-    const user = new User({ username: username, password: hash });
+    const user = new User({ username: username, password: password });
     await user.save();
     req.session.user_id = user._id;
     res.redirect('/');
 })
 
-
-app.get('/secret', (req, res) => { 
-    if (!req.session.user_id) { 
-        return res.redirect('/login')
-    } 
+// Added required login middleware
+app.get('/secret', requireLogin, (req, res) => { 
+    res.render('secret')
+})
+app.get('/topsecret', requireLogin, (req, res) => { 
     res.render('secret')
 })
 
