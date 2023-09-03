@@ -4,6 +4,9 @@ const User =      require('./models/user');
 const bcrypt =    require('bcrypt');
 const session =   require('express-session');
 
+
+
+// Connect to MongoDB Server
 mongoose.connect('mongodb://localhost:27017/auth')
     .then(() => {
         console.log("Mongo Connection Made !")
@@ -38,8 +41,9 @@ app.get('/', (req, res) => {
 app.get('/login', (req, res) => {res.render('login')})
 app.post('/login', async (req, res) => {
     const { password, username } = req.body;
+    // Check for existing user, and validate with credentials
     const foundUser = await User.findAndValidate(username, password);
-    if (!foundUser) {
+    if (!foundUser) {``
         res.send("Username or Password is wrong")
     }else { 
         if (foundUser) {

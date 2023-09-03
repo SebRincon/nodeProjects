@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
     }
 })
 
-// Middleware for the save function which will has the password before saving
+// Middleware for the save function which has the password before saving
 userSchema.pre('save', async function (next) { 
     // if not modification to password skip the hash function
     if (!this.isModified('password')) return next();
